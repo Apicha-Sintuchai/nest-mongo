@@ -13,6 +13,9 @@ export class Data {
 
     @Prop()
     age:number
+
+    @Prop()
+    file:string
 }
 
 export const mongodoc = SchemaFactory.createForClass(Data)

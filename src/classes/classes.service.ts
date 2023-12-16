@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
-
+import * as fs from 'fs';
 import { Data } from 'src/Schema/Schema';
 
 @Injectable()
@@ -14,10 +15,15 @@ export class ClassesService {
     const findAlll = await this.DataModel.find();
     return findAlll;
   }
+  async create(postbook: any, file: Express.Multer.File): Promise<Data> {
+    const intodb = new this.DataModel({
+      name: postbook.name,
+      lastname: postbook.lastname,
+      age: postbook.age,
+      file: file.originalname,
+    });
 
-  async create(postbook: Data): Promise<Data> {
-    const res = await this.DataModel.create(postbook);
-    return res;
+    return intodb.save();
   }
 
   async updaye(id: string, update: Data): Promise<Data> {
@@ -26,12 +32,28 @@ export class ClassesService {
   }
 
   async deleteById(id: any): Promise<Data> {
-    const deletebyid = await this.DataModel.findOneAndDelete(id);
-    return deletebyid;
+    const deletebyid = await this.DataModel.findOneAndDelete({ _id: id });
+    if (deletebyid?.file) {
+      await fs.unlink('picture/' + deletebyid.file, (err) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log('work');
+        }
+      });
+    }
+    console.log(deletebyid.file);
+    return;
   }
 
   async findbyid(id: any): Promise<Data> {
-    const findid = await this.DataModel.findOne(id);
+    const findid = await this.DataModel.findOne(id).exec();
     return findid;
+  }
+
+  async saveFileToDatabase(file) {
+    console.log(file.originalname);
+    // const savepic = await this.DataModel.create(file);
+    return;
   }
 }
